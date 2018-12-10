@@ -60,7 +60,7 @@ io.on('connection', function (socket) {
         if(data.room_name.length){
             let room = io.sockets.adapter.rooms[data.room_name];
             if(room){
-                if(room.length < 2) {
+                if(room.length < 2) { //Should be changed to four once it is working with two
                     socket.join(data.room_name);
                     console.log('room:' + data.room_name + 'joined by ' + data.username);
                     socket.emit('joinedRoom', {name: data.username});
@@ -103,6 +103,6 @@ io.on('connection', function (socket) {
     })
 });
 
-server.listen(3000, function () {
-    console.log('Listening on: 3000');
+server.listen(1234, function () {
+    console.log('Listening on: 1234');
 });

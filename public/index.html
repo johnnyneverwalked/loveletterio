@@ -3,8 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="js/includes.js"></script>
 </head>
 <body>
 
+<div id="container">
+    <div class="semi-transparent">
+        <h1 style="color:#d30000"><img src="images/logo.png"> IO</h1>
+        <div style="width:100%; height:10%"></div>
+
+        <div class="input-group-2">
+            <label for="username">Username:</label>
+            <input id="username" type="text" placeholder="What should I call you?">
+        </div>
+
+        <div id='error-container' style="width:100%; height:5%; margin-top: 5%">
+            <span id="err" class="error-msg"></span>
+        </div>
+
+        <div class="input-group-2">
+            <label for="newRoom">Create a new Room:</label>
+            <input id="newRoom" type="text" placeholder="Room name">
+            <button id="newbtn" type="button" class="btn btn-success">Create</button>
+        </div>
+        <h1>OR</h1>
+        <div class="input-group-2">
+            <label for="joinRoom">Join an existing Room:</label>
+            <input id="joinRoom" type="text" placeholder="Room name">
+            <button id="joinbtn" type="button" class="btn btn-info">Join</button>
+        </div>
+
+    </div>
+</div>
+
+
+<script src="js/socket-front.js"></script>
+<!--credit refs-->
+<a style="display: none" href="http://www.freepik.com">Designed by Freepik</a>
 </body>
 </html>

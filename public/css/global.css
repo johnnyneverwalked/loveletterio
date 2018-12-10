@@ -1,0 +1,66 @@
+*{
+    font-family: 'Abyssinica SIL', Roboto, Arial, sans-serif;
+}
+
+body{
+    background-image: url("../images/wood-bg.jpg");
+    background-size: cover;
+}
+
+h1{
+    font-style: italic;
+    text-align: center;
+    margin: 10px !important;
+}
+
+#container{
+    height: 100vh;
+}
+
+.error-msg{
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    width: 100%;
+}
+
+.semi-transparent{
+    background: rgba(255, 255, 255, 0.7);
+    width: 800px;
+    height: 100%;
+    padding-top: 15px;
+    position: relative;
+    margin:auto;
+}
+
+.input-group-2{
+    display: inline-block !important;
+    margin-left: 35%;
+}
+
+.input-group-2 label{
+    display: block;
+    font-weight: bold;
+    padding-top: 10px;
+    text-align: center;
+}
+
+.input-group-2 input{
+    border-radius: 3px;
+    padding: 5px;
+    border: 1px solid black;
+}
+
+.input-group-2 button{
+    display: block;
+    border-radius: 3px;
+    margin-top: 1px;
+    width: 100%;
+}
+
+.pull-left{
+    float:left;
+}
+.pull-right{
+    float:right;
+}
