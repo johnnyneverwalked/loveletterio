@@ -10,13 +10,13 @@
 <body>
 
 <div id="container">
-    <div  id="menu" class="semi-transparent">
+    <div  id="homemenu" class="semi-transparent">
         <h1 style="color:#d30000"><img src="images/logo.png"> IO</h1>
         <div style="width:100%; height:10%"></div>
 
         <div class="input-group-2">
             <label for="username">Username:</label>
-            <input id="username" type="text" placeholder="What should I call you?">
+            <input id="username" type="text" maxlength="12" placeholder="What should I call you?">
         </div>
 
         <div id='error-container' style="width:100%; height:5%; margin-top: 5%">
@@ -25,22 +25,23 @@
 
         <div class="input-group-2">
             <label for="newRoom">Create a new Room:</label>
-            <input id="newRoom" type="text" placeholder="Room name">
+            <input id="newRoom" type="text" maxlength="12" placeholder="Room name">
             <button id="newbtn" type="button" class="btn btn-success">Create</button>
         </div>
         <h1>OR</h1>
         <div class="input-group-2">
             <label for="joinRoom">Join an existing Room:</label>
-            <input id="joinRoom" type="text" placeholder="Room name">
+            <input id="joinRoom" type="text" maxlength="12" placeholder="Room name">
             <button id="joinbtn" type="button" class="btn btn-info">Join</button>
         </div>
-
     </div>
-
 </div>
 
 <script src="js/socket-front.js"></script>
 <!--credit refs-->
-<a style="display: none" href="http://www.freepik.com">Designed by Freepik</a>
+<div id="credit_refs" style="display: none">
+    <a href="http://www.freepik.com">Designed by Freepik</a>
+    <a href="https://icons8.com/icon/16438/joker">Joker icon by Icons8</a>
+</div>
 </body>
 </html>

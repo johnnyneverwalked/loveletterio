@@ -15,14 +15,103 @@ h1{
 
 #container{
     height: 100vh;
+    min-width: 940px;
+    min-height: 600px;
 }
 
 #chatbox{
+    display: inline-block;
     position: relative;
     height: 100%;
     width: 20%;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     border-left: solid;
+}
+
+#gameboard{
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    width: 80%;
+}
+
+#opponents{
+    position: absolute;
+    display: flex;
+    top: 10px;
+    left: calc(50% - 3*150px)
+}
+
+.player-container{
+    display: flex;
+    position: absolute;
+    bottom: 10px;
+    left: calc(50% - 125px);
+}
+
+.opponent{
+    position: relative;
+    display: inline-block;
+    margin: 0 10px 0 10px;
+    left: auto;
+    bottom: auto;
+}
+
+.player-card{
+    display: inline-block;
+    border: 5px solid;
+    border-radius: 5px;
+    width: 250px;
+    height: 100px;
+}
+.player-card h4{
+    font-weight: bold;
+    text-align: center;
+}
+
+.discard-pile{
+    display: inline-block;
+}
+
+#deck-container{
+    display: flex;
+    position: absolute;
+    top: calc(50% - 100px);
+    left: calc(50% - 140px)
+}
+
+.card{
+    display: inline-block;
+    border: 5px solid black;
+    border-radius: 5px;
+    height: 200px;
+    width: 136px;
+    margin: 0 10px 0 10px;
+}
+
+.card h1{
+    font-style: normal;
+    font-weight: bold;
+    color: black;
+}
+
+.card-back{
+background: indianred;
+}
+
+.card-discarded{
+    height: calc(0.5*200px);
+    width: calc(0.5*136px);
+    margin: 0;
+}
+
+.card-preview{
+    height: calc(2*200px);
+    width: calc(2*136px);
+}
+
+.empty-deck{
+border: 5px dashed black;
 }
 
 #messages{
