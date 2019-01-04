@@ -85,6 +85,8 @@ function initGame(room){
         player.hand = [room.deck.shift()];
         player.discarded = [];
         player.isDead = false;
+
+        io.to(player.id).emit('gameStarted', {hand: player.hand})
     });
     room.turn = Math.floor(Math.random()*room.players.length);
     room.playing = true;
@@ -98,6 +100,7 @@ function nextTurn(room){
         }
         if(!room.players[room.turn].isDead){
             let active = room.players[room.turn];
+            active.hand.push(room.deck.shift());
             io.to(active.id).emit('yourTurn', {
                 hand: active.hand
             });
@@ -209,7 +212,6 @@ io.on('connection', function (socket) {
         let r = findRoomPlayer(socket);
         let room = rooms[r.room];
 
-        io.in(room.id).emit('gameStarted');
         if(room.playing){
             socket.emit('updateDeck', {cards_remaining: room.deck.length});
         }else {

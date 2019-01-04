@@ -57,31 +57,36 @@ h1{
     bottom: auto;
 }
 
-.player-card{
-    position: relative;
-    display: inline-block;
-    border: 5px solid;
-    border-radius: 5px;
-    width: 250px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.2);
-}
-.player-card h4{
-    font-weight: bold;
-    text-align: center;
-    color: black;
-}
-
 #coin{
     position: absolute;
     top: -15px;
     left: -15px;
     width: 40px;
-
 }
 
+.player-card{
+position: relative;
+display: inline-block;
+border: 5px solid;
+border-radius: 5px;
+width: 250px;
+height: 100px;
+background: rgba(255, 255, 255, 0.2);
+}
+.player-card h4{
+font-weight: bold;
+text-align: center;
+color: black;
+}
+
+
 .discard-pile{
-    display: inline-block;
+    display: block;
+}
+.hand{
+    display: flex;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
 #deck-container{
@@ -116,15 +121,20 @@ h1{
     background: lightslategray;
 }
 
-.card-discarded{
+.card-mini{
     height: calc(0.5*200px);
     width: calc(0.5*136px);
     margin: 0;
 }
 
 .card-preview{
-    height: calc(2*200px);
-    width: calc(2*136px);
+    background: lightslategray;
+    height: calc(2.5*200px);
+    width: calc(2.5*136px);
+    position: absolute;
+    left: 0;
+    top: calc(50% - 1.25*200px);
+    z-index: 1001;
 }
 
 .empty-deck{

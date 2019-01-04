@@ -58,7 +58,17 @@ $(function () {
 
         $('#startbtn').on('click', function () {//start game
             socket.emit('startGame');
-        })
+        });
+    };
+
+    var addCard = function(selector, card){
+        $(selector).append('<div class="card card-mini card-front"><h1>'+card+'</h1></div>');
+        $(selector + ' div:last-child').hover(function () {
+            $('#card-prev').html($(this).html()).show();
+        }, function () {
+            $('#card-prev').hide();
+        });
+
     };
 
     $('#newbtn').on('click', function () { //create new room
@@ -159,6 +169,10 @@ $(function () {
 
     socket.on('yourTurn', function (data) {
         $('#coin').appendTo($('#you'));
+        $('#you .hand').empty();
+        data.hand.forEach(function (card) {
+            addCard('#you .hand', card);
+        });
 
     });
 
@@ -166,9 +180,13 @@ $(function () {
         $('#coin').appendTo($('#'+data.active_player));
     });
 
-    socket.on('gameStarted', function () {
+    socket.on('gameStarted', function (data) {
         $('#deck-container').show();
         $('#startbtn').hide();
+
+        if(data){
+            addCard('#you .hand', data.hand[0]);
+        }
     });
 
     socket.on('gameEnded', function () {
@@ -192,11 +210,6 @@ $(function () {
 
         if(data.cards_remaining === 0){
             $('#deck').removeClass('card-back').addClass('empty-deck');
-        }
-        if(data.hasOwnProperty('last_played')){
-            $('#last_played').removeClass('empty-deck')
-                .addClass('card-front')
-                .html('<h1>'+data.last_played+'</h1>');
         }
     });
 
