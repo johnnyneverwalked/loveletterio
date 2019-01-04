@@ -57,7 +57,6 @@ $(function () {
         });
 
         $('#startbtn').on('click', function () {//start game
-            $(this).hide();
             socket.emit('startGame');
         })
     };
@@ -149,27 +148,63 @@ $(function () {
                 }
             });
 
-            players = data.player_num;
-
         });
+
+        if(data.isDead){
+            $('#startbtn').trigger('click');
+        }
+
+        players = data.player_num;
     });
 
     socket.on('yourTurn', function (data) {
+        $('#coin').appendTo($('#you'));
 
     });
 
     socket.on('nextTurn', function (data) {
+        $('#coin').appendTo($('#'+data.active_player));
     });
 
+    socket.on('gameStarted', function () {
+        $('#deck-container').show();
+        $('#startbtn').hide();
+    });
+
+    socket.on('gameEnded', function () {
+        $('#deck-container').hide();
+        $('#startbtn').show();
+    })
+
     socket.on('updateDeck', function (data) {
-        $('#deck').html('<h1>'+data.cards_remaining+'</h1>');
+        let dimensions = 3 + data.cards_remaining;
+        $('#deck').css({
+            'border-top-left-radius': dimensions,
+            'border-top-right-radius': 0,
+            'border-bottom-right-radius': dimensions,
+            'border-bottom-left-radius': 0,
+            'border-top-width': 3,
+            'border-left-width': dimensions,
+            'border-bottom-width': dimensions,
+            'border-right-width': 3,
+            }).html('<h1>'+data.cards_remaining+'</h1>');
+
+
         if(data.cards_remaining === 0){
             $('#deck').removeClass('card-back').addClass('empty-deck');
+        }
+        if(data.hasOwnProperty('last_played')){
+            $('#last_played').removeClass('empty-deck')
+                .addClass('card-front')
+                .html('<h1>'+data.last_played+'</h1>');
         }
     });
 
     socket.on('userLeft', function (data) {
         players = data.player_num;
+        $('#'+data.username +' .player-card').css('background', 'rgba(255, 255, 255, 0.2)')
+            .html('<h4>Empty Seat</h4>');
+        $('#'+data.username).removeAttr('id');
     });
 
 });

@@ -75,7 +75,6 @@ function getPlayers(room, id) {
             })
         };
     });
-    console.log(players);
     return players;
 }
 
@@ -88,7 +87,6 @@ function initGame(room){
         player.isDead = false;
     });
     room.turn = Math.floor(Math.random()*room.players.length);
-    console.log(room.turn);
     room.playing = true;
 }
 
@@ -137,7 +135,6 @@ io.on('connection', function (socket) {
                     player_num: 1,
                     players: []
                 })
-                socket.emit('logMessage', {msg: 'you have joined successfully'});
                 room = {
                     id: room_name,
                     players: [addPlayer(socket.id, username)]
@@ -165,10 +162,9 @@ io.on('connection', function (socket) {
             let username = escape(data.username);
 
             let room = io.sockets.adapter.rooms[room_name];
-            if(room) {
+
+            if(room && rooms[room_name]){
                 room = rooms[room_name];
-            }
-            if(room){
                 if(room.players.length < 2) { //Should be changed to four once it is working with two
                     if(room.players.findIndex(p => p.username === username) === -1) {
                         socket.join(room_name);
@@ -184,13 +180,11 @@ io.on('connection', function (socket) {
                             players: getPlayers(room, socket.id)
                         });
 
-                        socket.emit('logMessage', {msg: 'you have joined successfully'});
                         socket.to(room_name).emit('joinedRoom', {
                             player_num: room.players.length + 1,
                             username: username,
                             isDead: room.playing
                         });
-
                         socket.to(room_name).emit('logMessage', {msg: username+' joined the room',});
                     }
                     else{
@@ -212,15 +206,19 @@ io.on('connection', function (socket) {
 
     //start game
     socket.on('startGame', function () {
-        console.log(io.sockets.adapter.rooms);
         let r = findRoomPlayer(socket);
         let room = rooms[r.room];
 
-        if(room && room.players.length > 0){// change it back to 1 after testing
-            initGame(room);
-            nextTurn(room);
-        }else{
-            socket.emit('logMessage', {msg: 'Not enough players', color: 'red'})
+        io.in(room.id).emit('gameStarted');
+        if(room.playing){
+            socket.emit('updateDeck', {cards_remaining: room.deck.length});
+        }else {
+            if (room && room.players.length > 0) {// change it back to 1 after testing
+                initGame(room);
+                nextTurn(room);
+            } else {
+                socket.emit('logMessage', {msg: 'Not enough players', color: 'red'})
+            }
         }
     });
 
@@ -244,7 +242,6 @@ io.on('connection', function (socket) {
     //handle a user leaving
     socket.on('disconnecting',function () {
         Object.keys(socket.rooms).forEach(function (room) {
-            // let roomIndex = rooms.findIndex(r => r.id === room);
             if(rooms[room]) {
                 let playerIndex = rooms[room].players.findIndex(p => p.id === socket.id);
 
@@ -261,11 +258,18 @@ io.on('connection', function (socket) {
                     delete rooms[room];
                     return;
                 }
-                if(rooms[room].playing && rooms[room].players.length === 1){
-                    socket.to(room).emit('logMessage', {
-                        msg: 'Game ended. Not enough players',
-                        color: 'red'
-                    });
+                if(rooms[room].playing){
+                    if(rooms[room].players.length === 1) {
+                        socket.to(room).emit('logMessage', {
+                            msg: 'Game ended. Not enough players',
+                            color: 'red'
+                        });
+                        rooms[room].playing = false;
+                        socket.to(room).emit('gameEnded');
+                        return;
+                    }
+
+                    nextTurn(rooms[room]);
                 }
             }
         });

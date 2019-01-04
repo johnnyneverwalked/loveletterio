@@ -15,7 +15,7 @@ h1{
 
 #container{
     height: 100vh;
-    min-width: 940px;
+    min-width: 980px;
     min-height: 600px;
 }
 
@@ -39,7 +39,7 @@ h1{
     position: absolute;
     display: flex;
     top: 10px;
-    left: calc(50% - 3*150px)
+    left: calc(50% - 3*135px)
 }
 
 .player-container{
@@ -52,21 +52,32 @@ h1{
 .opponent{
     position: relative;
     display: inline-block;
-    margin: 0 10px 0 10px;
+    margin: 20px 10px 0 10px;
     left: auto;
     bottom: auto;
 }
 
 .player-card{
+    position: relative;
     display: inline-block;
     border: 5px solid;
     border-radius: 5px;
     width: 250px;
     height: 100px;
+    background: rgba(255, 255, 255, 0.2);
 }
 .player-card h4{
     font-weight: bold;
     text-align: center;
+    color: black;
+}
+
+#coin{
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 40px;
+
 }
 
 .discard-pile{
@@ -82,11 +93,13 @@ h1{
 
 .card{
     display: inline-block;
-    border: 5px solid black;
+    background: transparent;
+    border: 3px solid black;
     border-radius: 5px;
     height: 200px;
     width: 136px;
     margin: 0 10px 0 10px;
+    background-size: 100% 100%;
 }
 
 .card h1{
@@ -96,7 +109,11 @@ h1{
 }
 
 .card-back{
-background: indianred;
+    background-image: url("../images/card-back-free.jpg");
+}
+
+.card-front{
+    background: lightslategray;
 }
 
 .card-discarded{
@@ -111,7 +128,7 @@ background: indianred;
 }
 
 .empty-deck{
-border: 5px dashed black;
+border-style: dashed;
 }
 
 #messages{
