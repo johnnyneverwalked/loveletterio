@@ -58,7 +58,6 @@ $(function () {
 
         $('#startbtn').on('click', function () {//start game
             socket.emit('startGame');
-            $(this).hide();
         });
 
         $('#rules').hover(function () {
@@ -161,7 +160,7 @@ $(function () {
                     $(this).attr('id', player.username);
                     $(this).find('.player-card').css('background', player.isDead ? 'gray' : 'mediumpurple').html('')
                         .append('<h4>player: ' + player.username + '</h4>')
-                        .append('<h4 class="points">points: ' + player.points + '</h4>');
+                        .append('<h4 name="points">points: ' + player.points + '</h4>');
 
                     player.discarded.forEach(function (card) {// doesnt work yet
                         addCard('#'+player.username+'.discard-pile', card);
@@ -196,7 +195,7 @@ $(function () {
 
     socket.on('gameStarted', function (data) {
         $('#deck-container').show();
-
+        $('#startbtn').hide();
         $('.hand').empty();
         $('.discard-pile').empty();
         $('#deck-discards').empty();
@@ -218,7 +217,6 @@ $(function () {
 
     socket.on('gameEnded', function (data) {
         $('#startbtn').show();
-
         $('#wildcard').hover(function () {
             $('#card-prev').css('background-image', "url("+data.wildcard.image+")").show()
         }, function () {
@@ -229,11 +227,11 @@ $(function () {
         $('.player-container[id] .player-card').css('background', 'mediumpurple')
     });
 
-    socket.on('win', function (data) {//doesnt work yet
-        if($('#'+data.username)){
-            $('#' + data.username + ' .player-card').css('background', 'red')
+    socket.on('win', function (data) {
+        if(username !== data.winner){
+            $('#'+data.winner+' [name=points]').text('points: '+data.points);
         }else{
-            $('#you .player-card').css('background', 'red')
+            $('#you [name=points]').text('points: '+data.points);
         }
     });
 

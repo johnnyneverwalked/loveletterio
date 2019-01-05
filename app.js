@@ -125,7 +125,7 @@ function getPlayers(room, id) {
                 points: player.points,
                 isDead: player.isDead,
             })
-        };
+        }
     });
     return players;
 }
@@ -161,7 +161,8 @@ function checkDeaths(room) {
         room.playing = false;
         if(alive.length === 1){
             alive[0].points++;
-            io.in(room.id).emit('win', {winner:alive[0].username, points: alive[0].points})
+            io.in(room.id).emit('win', {winner:alive[0].username, points: alive[0].points});
+            io.in(room.id).emit('logMessage', {msg: alive[0].username+' won the round!'});
         }
 
         io.in(room.id).emit('gameEnded', {wildcard: room.wildcard});
@@ -244,7 +245,7 @@ io.on('connection', function (socket) {
 
             if(room && rooms[room_name]){
                 room = rooms[room_name];
-                if(room.players.length < 4) { //Should be changed to four once it is working with two
+                if(room.players.length < 4) {
                     if(room.players.findIndex(p => p.username === username) === -1) {
                         socket.join(room_name);
                         room.players.push(addPlayer(socket.id, username));

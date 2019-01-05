@@ -92,7 +92,7 @@ color: black;
 
 
 .discard-pile{
-    display: block;
+    margin: 5px 20px 0 20px;
 }
 .hand{
     display: flex;
@@ -104,7 +104,7 @@ color: black;
     display: flex;
     position: absolute;
     top: calc(50% - 100px);
-    left: calc(50% - 300px)
+    left: calc(50% - 310px)
 }
 
 #deck-discards{
@@ -141,18 +141,22 @@ color: black;
 }
 
 .card-preview{
-    height: calc(2.5*200px);
-    width: calc(2.5*142px);
+    height: calc(2*200px);
+    width: calc(2*142px);
     position: absolute;
     left: 0;
     top: calc(50% - 1.25*200px);
     z-index: 1001;
+    box-shadow: 16px 16px 4px rgba(0, 0, 0, .5);
 }
 
 .empty-deck{
 border-style: dashed;
 }
 
+
+
+/*chat*/
 #messages{
     height: calc(100% - 55px);
     overflow-y: auto;
