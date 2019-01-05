@@ -58,16 +58,25 @@ $(function () {
 
         $('#startbtn').on('click', function () {//start game
             socket.emit('startGame');
+            $(this).hide();
         });
+
+        $('#rules').hover(function () {
+            $('#card-prev').css('background-image', "url(../images/copyright/rules.jpg)").show()
+        }, function () {
+            $('#card-prev').hide();
+        })
+
+
     };
 
     var addCard = function(selector, card){
-        $(selector).append('<div class="card card-mini card-front"><h1>'+card+'</h1></div>');
+        $(selector).append('<div class="card card-mini"></div>');
         $(selector + ' div:last-child').hover(function () {
-            $('#card-prev').html($(this).html()).show();
+            $('#card-prev').css('background-image', "url("+card.image+")").show()
         }, function () {
             $('#card-prev').hide();
-        });
+        }).css('background-image', "url("+card.image+")");
 
     };
 
@@ -152,7 +161,11 @@ $(function () {
                     $(this).attr('id', player.username);
                     $(this).find('.player-card').css('background', player.isDead ? 'gray' : 'mediumpurple').html('')
                         .append('<h4>player: ' + player.username + '</h4>')
-                        .append('<h4 name="points">points: ' + player.points + '</h4>');
+                        .append('<h4 class="points">points: ' + player.points + '</h4>');
+
+                    player.discarded.forEach(function (card) {// doesnt work yet
+                        addCard('#'+player.username+'.discard-pile', card);
+                    })
 
                     return false;
                 }
@@ -161,6 +174,7 @@ $(function () {
         });
 
         if(data.isDead){
+            $('#deck-container').show();
             $('#startbtn').trigger('click');
         }
 
@@ -182,21 +196,51 @@ $(function () {
 
     socket.on('gameStarted', function (data) {
         $('#deck-container').show();
-        $('#startbtn').hide();
+
+        $('.hand').empty();
+        $('.discard-pile').empty();
+        $('#deck-discards').empty();
+        $('#wildcard').addClass('card-back')
+            .unbind('mouseenter mouseleave')
+            .html('<h1>?</h1>')
+            .removeAttr('style');
 
         if(data){
-            addCard('#you .hand', data.hand[0]);
+            if(data.hasOwnProperty('hand')) {
+                addCard('#you .hand', data.hand[0]);
+            }
+            data.discarded.forEach(function (card) {
+                addCard('#deck-discards', card);
+            })
+        }
+
+    });
+
+    socket.on('gameEnded', function (data) {
+        $('#startbtn').show();
+
+        $('#wildcard').hover(function () {
+            $('#card-prev').css('background-image', "url("+data.wildcard.image+")").show()
+        }, function () {
+            $('#card-prev').hide();
+        }).removeClass('card-back').empty()
+            .css('background-image', "url("+data.wildcard.image+")");
+
+        $('.player-container[id] .player-card').css('background', 'mediumpurple')
+    });
+
+    socket.on('win', function (data) {//doesnt work yet
+        if($('#'+data.username)){
+            $('#' + data.username + ' .player-card').css('background', 'red')
+        }else{
+            $('#you .player-card').css('background', 'red')
         }
     });
 
-    socket.on('gameEnded', function () {
-        $('#deck-container').hide();
-        $('#startbtn').show();
-    })
 
     socket.on('updateDeck', function (data) {
         let dimensions = 3 + data.cards_remaining;
-        $('#deck').css({
+        $('#deck').css({//give a deck thinning effect
             'border-top-left-radius': dimensions,
             'border-top-right-radius': 0,
             'border-bottom-right-radius': dimensions,

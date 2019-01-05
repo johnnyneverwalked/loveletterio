@@ -35,6 +35,17 @@ h1{
     width: 80%;
 }
 
+#startbtn{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+#rules{
+    background-image: url("../images/copyright/rules.jpg");
+    margin-right: 10px;
+}
+
 #opponents{
     position: absolute;
     display: flex;
@@ -93,7 +104,11 @@ color: black;
     display: flex;
     position: absolute;
     top: calc(50% - 100px);
-    left: calc(50% - 140px)
+    left: calc(50% - 300px)
+}
+
+#deck-discards{
+    display: flex;
 }
 
 .card{
@@ -102,7 +117,7 @@ color: black;
     border: 3px solid black;
     border-radius: 5px;
     height: 200px;
-    width: 136px;
+    width: 142px;
     margin: 0 10px 0 10px;
     background-size: 100% 100%;
 }
@@ -111,26 +126,23 @@ color: black;
     font-style: normal;
     font-weight: bold;
     color: black;
+    text-align: left;
+    margin: 0 0 0 2px !important;
 }
 
 .card-back{
-    background-image: url("../images/card-back-free.jpg");
-}
-
-.card-front{
-    background: lightslategray;
+    background-image: url("../images/copyright/card-back.jpg");
 }
 
 .card-mini{
     height: calc(0.5*200px);
-    width: calc(0.5*136px);
+    width: calc(0.5*142px);
     margin: 0;
 }
 
 .card-preview{
-    background: lightslategray;
     height: calc(2.5*200px);
-    width: calc(2.5*136px);
+    width: calc(2.5*142px);
     position: absolute;
     left: 0;
     top: calc(50% - 1.25*200px);

@@ -12,8 +12,60 @@ app.get('/', function (req, res) {
 });
 
 let rooms = {};
+let imgdest = '../images/copyright/';
 
-let deck = [1,1,1,1,1,2,2,3,3,4,4,5,5,6,7,8];
+let suits = {
+    guard: {
+        id: 1,
+        image: imgdest + 'guard.jpg'
+    },
+    priest: {
+        id: 2,
+        image: imgdest + 'priest.jpg'
+    },
+    baron: {
+        id: 3,
+        image: imgdest + 'baron.jpg'
+    },
+    handmaid: {
+        id: 4,
+        image: imgdest + 'handmaid.jpg'
+    },
+    prince: {
+        id: 5,
+        image: imgdest + 'prince.jpg'
+    },
+    king: {
+        id: 6,
+        image: imgdest + 'king.jpg'
+    },
+    countess: {
+        id: 7,
+        image: imgdest + 'countess.jpg'
+    },
+    princess: {
+        id: 8,
+        image: imgdest + 'princess.jpg'
+    }
+};
+
+let buildDeck = function () {
+    let deck = [];
+    for(i=0; i<5; i++){
+        deck.push(suits.guard)
+    }
+    for(i=0; i<2; i++){
+        deck.push(suits.priest);
+        deck.push(suits.baron);
+        deck.push(suits.handmaid);
+        deck.push(suits.prince);
+    }
+    deck.push(suits.king);
+    deck.push(suits.countess);
+    deck.push(suits.princess);
+
+    return deck;
+};
 
 function addPlayer(id, username) {
     return {
@@ -79,17 +131,41 @@ function getPlayers(room, id) {
 }
 
 function initGame(room){
-    room.deck = shuffle(deck.slice());
+    room.deck = shuffle(buildDeck());
+    room.discarded = [];
+    if(room.players.length <= 2){
+        for(i=0; i<3; i++){
+            room.discarded.push(room.deck.shift());
+        }
+    }
     room.wildcard = room.deck.shift();
     room.players.forEach(function (player) {
         player.hand = [room.deck.shift()];
         player.discarded = [];
         player.isDead = false;
 
-        io.to(player.id).emit('gameStarted', {hand: player.hand})
+        io.to(player.id).emit('gameStarted', {hand: player.hand, discarded: room.discarded})
     });
     room.turn = Math.floor(Math.random()*room.players.length);
     room.playing = true;
+}
+
+function checkDeaths(room) {
+    let alive = [];
+    room.players.forEach(function (player) {
+        if(!player.isDead){
+            alive.push(player);
+        }
+    });
+    if(alive.length < 2){
+        room.playing = false;
+        if(alive.length === 1){
+            alive[0].points++;
+            io.in(room.id).emit('win', {winner:alive[0].username, points: alive[0].points})
+        }
+
+        io.in(room.id).emit('gameEnded', {wildcard: room.wildcard});
+    }
 }
 
 function nextTurn(room){
@@ -137,7 +213,7 @@ io.on('connection', function (socket) {
                     username: username,
                     player_num: 1,
                     players: []
-                })
+                });
                 room = {
                     id: room_name,
                     players: [addPlayer(socket.id, username)]
@@ -168,7 +244,7 @@ io.on('connection', function (socket) {
 
             if(room && rooms[room_name]){
                 room = rooms[room_name];
-                if(room.players.length < 2) { //Should be changed to four once it is working with two
+                if(room.players.length < 4) { //Should be changed to four once it is working with two
                     if(room.players.findIndex(p => p.username === username) === -1) {
                         socket.join(room_name);
                         room.players.push(addPlayer(socket.id, username));
@@ -213,6 +289,7 @@ io.on('connection', function (socket) {
         let room = rooms[r.room];
 
         if(room.playing){
+            socket.emit('gameStarted', {discarded: room.discarded});
             socket.emit('updateDeck', {cards_remaining: room.deck.length});
         }else {
             if (room && room.players.length > 0) {// change it back to 1 after testing
@@ -267,11 +344,13 @@ io.on('connection', function (socket) {
                             color: 'red'
                         });
                         rooms[room].playing = false;
-                        socket.to(room).emit('gameEnded');
+                        socket.to(room).emit('gameEnded', {wildcard: rooms[room].wildcard});
                         return;
                     }
-
-                    nextTurn(rooms[room]);
+                    checkDeaths(rooms[room]);
+                    if(playerIndex === room.turn && rooms[room].playing) {
+                        nextTurn(rooms[room]);
+                    }
                 }
             }
         });
