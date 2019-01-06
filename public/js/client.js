@@ -70,7 +70,7 @@ $(function () {
     };
 
     var addCard = function(selector, card){
-        $(selector).append('<div class="card card-mini"></div>');
+        $(selector).append('<div face="'+card.id+'" class="card card-mini"></div>');
         $(selector + ' div:last-child').hover(function () {
             $('#card-prev').css('background-image', "url("+card.image+")").show()
         }, function () {
@@ -181,16 +181,37 @@ $(function () {
     });
 
     socket.on('yourTurn', function (data) {
-        $('#coin').appendTo($('#you'));
+        $('#coin').appendTo($('#you .player-card'));
         $('#you .hand').empty();
         data.hand.forEach(function (card) {
             addCard('#you .hand', card);
         });
+        $('#you .hand .card').on('click', function () {// event for play card
+            $(this).off('click').css({
+                position: 'absolute',
+                left: $('#you .discard-pile .card').length*0.5*$(this).width(),
+                bottom: 0
+            });
+            $('#you .discard-pile').append($(this));
+
+            socket.emit('playCard', {id: $(this).attr('face')});
+        })
 
     });
 
     socket.on('nextTurn', function (data) {
-        $('#coin').appendTo($('#'+data.active_player));
+        $('#coin').appendTo($('#'+data.active_player+' .player-card'));
+        $('#you .hand .card').off('click');
+    });
+
+    socket.on('cardPlayed', function (data) {
+        let selector = '#'+data.username+' .discard-pile';
+        addCard(selector, data.card);
+        $(selector+' .card').last().css({
+            position: 'absolute',
+            left: ($(selector+' .card').length-1)*0.5*$(selector+' .card').width(),
+            top: 0
+        });
     });
 
     socket.on('gameStarted', function (data) {

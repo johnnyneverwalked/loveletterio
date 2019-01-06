@@ -76,28 +76,31 @@ h1{
 }
 
 .player-card{
-position: relative;
-display: inline-block;
-border: 5px solid;
-border-radius: 5px;
-width: 250px;
-height: 100px;
-background: rgba(255, 255, 255, 0.2);
+    position: relative;
+    display: inline-block;
+    border: 5px solid;
+    border-radius: 5px;
+    width: 250px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
 }
 .player-card h4{
-font-weight: bold;
-text-align: center;
-color: black;
+    font-weight: bold;
+    text-align: center;
+    color: black;
 }
 
 
 .discard-pile{
-    margin: 5px 20px 0 20px;
+    margin: 0 20px 5px 20px;
+    position: relative;
 }
 .hand{
     display: flex;
+    flex-direction: row;
     cursor: pointer;
     margin-left: 10px;
+    align-self: flex-end;
 }
 
 #deck-container{

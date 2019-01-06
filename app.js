@@ -15,35 +15,35 @@ let rooms = {};
 let imgdest = '../images/copyright/';
 
 let suits = {
-    guard: {
+    1: {
         id: 1,
         image: imgdest + 'guard.jpg'
     },
-    priest: {
+    2: {
         id: 2,
         image: imgdest + 'priest.jpg'
     },
-    baron: {
+    3: {
         id: 3,
         image: imgdest + 'baron.jpg'
     },
-    handmaid: {
+    4: {
         id: 4,
         image: imgdest + 'handmaid.jpg'
     },
-    prince: {
+    5: {
         id: 5,
         image: imgdest + 'prince.jpg'
     },
-    king: {
+    6: {
         id: 6,
         image: imgdest + 'king.jpg'
     },
-    countess: {
+    7: {
         id: 7,
         image: imgdest + 'countess.jpg'
     },
-    princess: {
+    8: {
         id: 8,
         image: imgdest + 'princess.jpg'
     }
@@ -52,17 +52,18 @@ let suits = {
 let buildDeck = function () {
     let deck = [];
     for(i=0; i<5; i++){
-        deck.push(suits.guard)
+        deck.push(suits[1])
     }
     for(i=0; i<2; i++){
-        deck.push(suits.priest);
-        deck.push(suits.baron);
-        deck.push(suits.handmaid);
-        deck.push(suits.prince);
+        deck.push(suits[2]);
+        deck.push(suits[3]);
+        deck.push(suits[4]);
+        deck.push(suits[5]);
     }
-    deck.push(suits.king);
-    deck.push(suits.countess);
-    deck.push(suits.princess);
+    deck.push(suits[6]);
+    deck.push(suits[7]);
+    deck.push(suits[8]);
+
 
     return deck;
 };
@@ -150,7 +151,7 @@ function initGame(room){
     room.playing = true;
 }
 
-function checkDeaths(room) {
+function checkDeaths(room) {//check if an end game condition is met
     let alive = [];
     room.players.forEach(function (player) {
         if(!player.isDead){
@@ -299,6 +300,15 @@ io.on('connection', function (socket) {
             } else {
                 socket.emit('logMessage', {msg: 'Not enough players', color: 'red'})
             }
+        }
+    });
+
+    socket.on('playCard', function (data) {
+        let r = findRoomPlayer(socket);
+        let card = suits[data.id];
+
+        if(r && card){
+            socket.to(r.room).emit('cardPlayed', {username: r.username, card: card})
         }
     });
 
