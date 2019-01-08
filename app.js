@@ -17,35 +17,35 @@ let imgdest = '../images/copyright/';
 let suits = {
     1: {
         id: 1,
-        image: imgdest + 'guard.jpg'
+        image: imgdest + '1.jpg'
     },
     2: {
         id: 2,
-        image: imgdest + 'priest.jpg'
+        image: imgdest + '2.jpg'
     },
     3: {
         id: 3,
-        image: imgdest + 'baron.jpg'
+        image: imgdest + '3.jpg'
     },
     4: {
         id: 4,
-        image: imgdest + 'handmaid.jpg'
+        image: imgdest + '4.jpg'
     },
     5: {
         id: 5,
-        image: imgdest + 'prince.jpg'
+        image: imgdest + '5.jpg'
     },
     6: {
         id: 6,
-        image: imgdest + 'king.jpg'
+        image: imgdest + '6.jpg'
     },
     7: {
         id: 7,
-        image: imgdest + 'countess.jpg'
+        image: imgdest + '7.jpg'
     },
     8: {
         id: 8,
-        image: imgdest + 'princess.jpg'
+        image: imgdest + '8.jpg'
     }
 };
 

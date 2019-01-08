@@ -1,5 +1,5 @@
 *{
-    font-family: 'Abyssinica SIL', Roboto, Arial, sans-serif;
+    font-family: 'Abyssinica SIL', sans-serif;
 }
 
 body{
@@ -53,6 +53,12 @@ h1{
     left: calc(50% - 3*135px)
 }
 
+.modal-custom{
+    width: 360px;
+    position: absolute;
+    left: calc(50% - 180px)
+}
+
 .player-container{
     display: flex;
     position: absolute;
@@ -68,7 +74,7 @@ h1{
     bottom: auto;
 }
 
-#coin{
+.coin{
     position: absolute;
     top: -15px;
     left: -15px;
@@ -151,6 +157,10 @@ h1{
     top: calc(50% - 1.25*200px);
     z-index: 1001;
     box-shadow: 16px 16px 4px rgba(0, 0, 0, .5);
+}
+
+.selected-card{
+    border: solid green;
 }
 
 .empty-deck{

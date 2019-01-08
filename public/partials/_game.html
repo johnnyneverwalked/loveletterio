@@ -1,4 +1,42 @@
 <div id="gameboard" class="pull-left">
+
+    <!-- The Modal -->
+    <div class="modal modal-custom fade" id="selectModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h2>Select cards/players</h2>
+                </div>
+                <div class="modal-body">
+                    <div face="" id="cards">
+                        <div face="2" class="card card-mini"></div>
+                        <div face="3" class="card card-mini"></div>
+                        <div face="4" class="card card-mini"></div>
+                        <div face="5" class="card card-mini"></div>
+                        <br>
+                        <div face="6" class="card card-mini"></div>
+                        <div face="7" class="card card-mini"></div>
+                        <div face="8" class="card card-mini"></div>
+                        <hr>
+                    </div>
+                    <div id="playerSelect">
+                        <h5>Players:</h5>
+                        <select class="form-control">
+                            <option>opp1</option>
+                            <option>opp2</option>
+                            <option>opp3</option>
+                            <option>you</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="opponents">
         <div class="player-container opponent">
             <div class="player-card">
@@ -36,7 +74,7 @@
         <div>
             <div class="discard-pile"></div>
             <div class="player-card">
-                <img id="coin" src="images/coin.png">
+                <img id="coin" class="coin" src="images/coin.png">
             </div>
         </div>
         <div class="hand"></div>

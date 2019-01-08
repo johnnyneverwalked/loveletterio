@@ -1,7 +1,7 @@
 $(function () {
 
     var socket = io.connect('http://localhost:1234');
-    var players = 0;
+    var protection = {};
     var username = null;
 
     var getChat = function(container_id){
@@ -58,12 +58,26 @@ $(function () {
 
         $('#startbtn').on('click', function () {//start game
             socket.emit('startGame');
+            $('#selectModal').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            $('#selectModal').modal('show')
         });
 
         $('#rules').hover(function () {
             $('#card-prev').css('background-image', "url(../images/copyright/rules.jpg)").show()
         }, function () {
             $('#card-prev').hide();
+        });
+        
+        $('#cards .card').each(function () { //modal cards events
+            $(this).css('background-image', 'url("images/copyright/'+$(this).attr('face')+'.jpg")');
+            $(this).on('click', function () {
+                $('#cards .selected-card').removeClass('selected-card');
+                $(this).addClass('selected-card');
+                $('#cards').attr('face', $(this).attr('face'));
+            });
         })
 
 
