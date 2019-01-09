@@ -75,6 +75,7 @@ function addPlayer(id, username) {
         hand: [],
         discarded: [],
         points: 0,
+        isProtected: false,
         isDead: false,
     }
 }
@@ -90,6 +91,14 @@ let stringToColor = function(str) {
         colour += ('00' + value.toString(16)).substr(-2);
     }
     return colour;
+};
+
+let sum_array = function (array, prop) {
+    var total = 0;
+    for ( var i = 0, _len = this.length; i < _len; i++ ) {
+        total += this[i][prop];
+    }
+    return total;
 };
 
 function shuffle(a) {
@@ -144,6 +153,7 @@ function initGame(room){
         player.hand = [room.deck.shift()];
         player.discarded = [];
         player.isDead = false;
+        player.isProtected = false;
 
         io.to(player.id).emit('gameStarted', {hand: player.hand, discarded: room.discarded})
     });
@@ -158,7 +168,7 @@ function checkDeaths(room) {//check if an end game condition is met
             alive.push(player);
         }
     });
-    if(alive.length < 2){
+    if(alive.length < 1){ //change it back to 2 after testing
         room.playing = false;
         if(alive.length === 1){
             alive[0].points++;
@@ -170,28 +180,71 @@ function checkDeaths(room) {//check if an end game condition is met
     }
 }
 
+function checkDeck(room) { //check winner if deck runs out
+    if( room.deck.length !== 0)
+        return;
+    let max_card = 0;
+    let max_discarded = 0;
+    let winner = null;
+    room.players.forEach(function (player) {
+        if(!player.isDead && player.hand[0] >= max_card){
+            let sum_discarded = sum_array(player.discarded, 'id');
+            if(player.hand[0] === max_card && sum_discarded === max_discarded){
+                winner = null;
+            }else {
+                max_card = player.hand[0];
+                max_discarded = sum_discarded;
+                winner = player;
+            }
+        }
+    });
+    if(winner){
+        winner.points++;
+        io.in(room.id).emit('win', {winner: winner.username, points: winner.points});
+        io.in(room.id).emit('logMessage', {msg: winner.username+' won the round!'});
+    }else {
+        io.in(room.id).emit('logMessage', {msg: 'No winner for this round'});
+    }
+    room.playing = false;
+    io.in(room.id).emit('gameEnded', {wildcard: room.wildcard});
+}
+
+function killPlayer(room, socket){
+    let player = room.players.find(p => p.id === socket.id);
+    if(player){
+        player.isDead = true;
+        io.in(room.id).emit('killed', {username: player.username})
+    }
+}
+
 function nextTurn(room){
-    do {
-        room.turn++;
-        if (room.players.length <= room.turn) {
-            room.turn = 0;
-        }
-        if(!room.players[room.turn].isDead){
-            let active = room.players[room.turn];
-            active.hand.push(room.deck.shift());
-            io.to(active.id).emit('yourTurn', {
-                hand: active.hand
-            });
-            room.players.forEach(function (player) {
-                if(player.id !== active.id){
-                    io.to(player.id).emit('nextTurn', {
-                        active_player: active.username
-                    });
-                }
-            });
-            io.in(room.id).emit('updateDeck', {cards_remaining: room.deck.length});
-        }
-    }while (room.players[room.turn].isDead)
+    checkDeaths(room);
+    checkDeck(room);
+    if(room.playing) {
+        do {
+            room.turn++;
+            if (room.players.length <= room.turn) {
+                room.turn = 0;
+            }
+            if (!room.players[room.turn].isDead) {
+                let active = room.players[room.turn];
+                active.hand.push(room.deck.shift());
+                active.isProtected = false;
+                io.to(active.id).emit('yourTurn', {
+                    hand: active.hand,
+                    username: active.username
+                });
+                room.players.forEach(function (player) {
+                    if (player.id !== active.id) {
+                        io.to(player.id).emit('nextTurn', {
+                            active_player: active.username
+                        });
+                    }
+                });
+                io.in(room.id).emit('updateDeck', {cards_remaining: room.deck.length});
+            }
+        } while (room.players[room.turn].isDead);
+    }
 }
 
 io.on('connection', function (socket) {
@@ -307,9 +360,19 @@ io.on('connection', function (socket) {
         let r = findRoomPlayer(socket);
         let card = suits[data.id];
 
-        if(r && card){
-            socket.to(r.room).emit('cardPlayed', {username: r.username, card: card})
+        if(card){
+            let player = rooms[r.room].players.find(p => p.id === socket.id);
+            if(player && !player.isDead){
+                let cardIndex = player.hand.findIndex(c => c.id === card.id);
+                if(cardIndex !== -1){
+                    player.discarded.push(player.hand.splice(cardIndex, 1));
+                    socket.to(r.room).emit('cardPlayed', {username: r.username, card: card});
+                }
+            }
+        }else {
+            killPlayer(rooms[r.room], socket);
         }
+        nextTurn(rooms[r.room])
     });
 
     //send a chat message

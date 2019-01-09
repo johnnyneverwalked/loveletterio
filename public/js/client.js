@@ -1,8 +1,18 @@
 $(function () {
 
     var socket = io.connect('http://localhost:1234');
-    var protection = {};
+    var protection = [];
+    var players = [];
+    var lastPlayed = null;
     var username = null;
+
+    var remove = function(array, element) {
+        const index = array.indexOf(element);
+
+        if (index !== -1) {
+            array.splice(index, 1);
+        }
+    };
 
     var getChat = function(container_id){
         $.ajax({
@@ -157,7 +167,6 @@ $(function () {
             }
         });
 
-        players = data.player_num;
     });
 
     socket.on('joined', function (data) {
@@ -168,8 +177,17 @@ $(function () {
             .append('<h4>player: ' + data.username + '</h4>')
             .append('<h4 name="points">points: 0</h4>');
 
+        players.push(data.username);
+        if(data.isDead){
+            protection.push(data.username);
+        }
+
         data.players.forEach(function (player) {
             $('#opponents .player-container').each(function () {
+                players.push(player.username);
+                if(player.isDead){
+                    protection.push(player.username);
+                }
                 if (!$(this).attr('id')) {
                     $(this).attr('id', player.username);
                     $(this).find('.player-card').css('background', player.isDead ? 'gray' : 'mediumpurple').html('')
@@ -178,35 +196,33 @@ $(function () {
 
                     player.discarded.forEach(function (card) {// doesnt work yet
                         addCard('#'+player.username+'.discard-pile', card);
-                    })
-
+                    });
                     return false;
                 }
             });
-
         });
-
         if(data.isDead){
             $('#deck-container').show();
             $('#startbtn').trigger('click');
         }
-
-        players = data.player_num;
     });
 
     socket.on('yourTurn', function (data) {
-        $('#coin').appendTo($('#you .player-card'));
+        remove(protection, data.username);
+        $('#you .player-card').append($('#coin')).remove($('#shield'));
         $('#you .hand').empty();
         data.hand.forEach(function (card) {
             addCard('#you .hand', card);
         });
         $('#you .hand .card').on('click', function () {// event for play card
-            $(this).off('click').css({
+            $(this).css({
                 position: 'absolute',
                 left: $('#you .discard-pile .card').length*0.5*$(this).width(),
                 bottom: 0
             });
             $('#you .discard-pile').append($(this));
+
+            $('#you .hand .card').off('click');
 
             socket.emit('playCard', {id: $(this).attr('face')});
         })
@@ -214,7 +230,7 @@ $(function () {
     });
 
     socket.on('nextTurn', function (data) {
-        $('#coin').appendTo($('#'+data.active_player+' .player-card'));
+        $('#'+data.active_player+' .player-card').append($('#coin')).remove('#shield');
         $('#you .hand .card').off('click');
     });
 
@@ -251,6 +267,7 @@ $(function () {
     });
 
     socket.on('gameEnded', function (data) {
+        protection = [];
         $('#startbtn').show();
         $('#wildcard').hover(function () {
             $('#card-prev').css('background-image', "url("+data.wildcard.image+")").show()
@@ -290,11 +307,32 @@ $(function () {
         }
     });
 
+    socket.on('killed', function (data) {
+        protection.push(data.username);
+        if(username !== data.username) {
+            $('#' + data.username + ' .player-card').css('background', 'gray');
+        }else{
+            $('#you .player-card').css('background', 'gray');
+
+        }
+    });
+
+    socket.on('protected', function (data) { //handmaid protection event
+        protection.push(data.username);
+        if(username !== data.username) {
+            $('#' + data.username + ' .player-card').append('<img id="shield" class="coin" src="images/shield.png">');
+        }else{
+            $('#you .player-card').append('<img id="shield" class="coin" src="images/shield.png">');
+
+        }
+    });
+
     socket.on('userLeft', function (data) {
-        players = data.player_num;
         $('#'+data.username +' .player-card').css('background', 'rgba(255, 255, 255, 0.2)')
             .html('<h4>Empty Seat</h4>');
         $('#'+data.username).removeAttr('id');
+        remove(players, data.username);
+        remove(protection, data.username);
     });
 
 });
