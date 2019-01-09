@@ -72,7 +72,7 @@ $(function () {
                 backdrop: 'static',
                 keyboard: false
             });
-            $('#selectModal').modal('show')
+            showSelect()
         });
 
         $('#rules').hover(function () {
@@ -90,6 +90,22 @@ $(function () {
             });
         })
 
+
+    };
+
+    var showSelect = function () {
+        if(lastPlayed === 1){
+            $('#cards').show();
+        }else{
+            $('#cards').hide();
+        }
+
+        $('#playerSelect').html('');
+        players.forEach(function (player) {
+            if(protection.indexOf(player) === -1){
+                $('#playerSelect').append('<option>'+player+'</option>');
+            }
+        })
 
     };
 
@@ -209,7 +225,10 @@ $(function () {
 
     socket.on('yourTurn', function (data) {
         remove(protection, data.username);
-        $('#you .player-card').append($('#coin')).remove($('#shield'));
+        $('#you .player-card').append($('#coin'));
+
+        $('#you .player-card .shield').remove();
+
         $('#you .hand').empty();
         data.hand.forEach(function (card) {
             addCard('#you .hand', card);
@@ -230,7 +249,8 @@ $(function () {
     });
 
     socket.on('nextTurn', function (data) {
-        $('#'+data.active_player+' .player-card').append($('#coin')).remove('#shield');
+        $('#'+data.active_player+' .player-card').append($('#coin'));
+        $('#'+data.active_player+' .player-card .shield').remove();
         $('#you .hand .card').off('click');
     });
 
@@ -320,10 +340,9 @@ $(function () {
     socket.on('protected', function (data) { //handmaid protection event
         protection.push(data.username);
         if(username !== data.username) {
-            $('#' + data.username + ' .player-card').append('<img id="shield" class="coin" src="images/shield.png">');
+            $('#' + data.username + ' .player-card').append('<img class="coin shield" src="images/shield.png">');
         }else{
-            $('#you .player-card').append('<img id="shield" class="coin" src="images/shield.png">');
-
+            $('#you .player-card').append('<img class="coin shield" src="images/shield.png">');
         }
     });
 
