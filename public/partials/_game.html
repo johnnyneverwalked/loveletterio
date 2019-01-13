@@ -6,7 +6,8 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h2>Select cards/players</h2>
+                    <h3>Select cards/players</h3>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div face="" id="cards">
@@ -27,7 +28,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button data-dismiss="modal" type="button" class="btn btn-success">OK</button>
+                    <button id="selectbtn" type="button" class="btn btn-block btn-success">OK</button>
                 </div>
             </div>
         </div>
@@ -78,5 +79,6 @@
     <div id="card-prev" style="display: none" class="card card-preview">
 
     </div>
-    <button id="startbtn" class="btn btn-lg btn-success">Start</button>
+    <button type="button" id="startbtn" class="btn btn-lg btn-success game-btn">Start</button>
+    <button type="button" data-toggle="modal" data-target="#selectModal" style="display: none" id="showSelectButton" class="btn btn-lg btn-primary game-btn">Show Selections</button>
 </div>

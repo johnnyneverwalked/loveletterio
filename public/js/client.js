@@ -68,11 +68,6 @@ $(function () {
 
         $('#startbtn').on('click', function () {//start game
             socket.emit('startGame');
-            $('#selectModal').modal({
-                backdrop: 'static',
-                keyboard: false
-            });
-            showSelect()
         });
 
         $('#rules').hover(function () {
@@ -93,20 +88,54 @@ $(function () {
 
     };
 
+    var playCard = function(cardPlayed, target, cardChosen){
+        console.log(cardPlayed, target, cardChosen);
+        socket.emit('playCard', {
+            cardPlayed: cardPlayed,
+            cardChosen: cardChosen,
+            target: target
+        });
+    };
+
     var showSelect = function () {
-        if(lastPlayed === 1){
-            $('#cards').show();
-        }else{
-            $('#cards').hide();
-        }
+        let cards = ['1','2','3','5','6'];
 
-        $('#playerSelect').html('');
-        players.forEach(function (player) {
-            if(protection.indexOf(player) === -1){
-                $('#playerSelect').append('<option>'+player+'</option>');
+        if(cards.includes(lastPlayed)) {
+
+            if (lastPlayed === '1') {
+                $('#cards').show();
+            } else {
+                $('#cards').hide();
             }
-        })
 
+            $('#playerSelect').html('');
+
+            //check if player is allowed to choose themselves
+            if(lastPlayed === '5'
+                || protection.length === players.length
+                || (protection.length === players.length - 1
+                    && !protection.includes(username))){
+                $('#playerSelect').append('<option>' + username + '</option>');
+            }
+            players.forEach(function (player) { //add selectable players
+                if (protection.indexOf(player) === -1 && player !== username) {
+                    $('#playerSelect').append('<option>' + player + '</option>');
+                }
+            });
+
+            $('#selectbtn').on('click', function () {
+                let face = $('#cards').attr('face');
+                if(lastPlayed !== '1' || face){//check if there is a guard target, opponent is selected by default
+                    $(this).off('click');
+                    $('#selectModal').modal('hide');
+                    playCard(lastPlayed, $('#playerSelect').find(':selected').text(), face);
+                }
+            });
+
+            $('#selectModal').modal('show');
+        }else{
+            playCard(lastPlayed, username);
+        }
     };
 
     var addCard = function(selector, card){
@@ -171,7 +200,7 @@ $(function () {
         $('#messages p:last-child').css({color: data.color, fontWeight: 'bold'});
     });
 
-    socket.on('joinedRoom', function (data) {
+    socket.on('joinedRoom', function (data) {//someone else joined
         $('#opponents .player-container').each(function () {
             if(!$(this).attr('id')){
                 $(this).attr('id', data.username);
@@ -182,10 +211,10 @@ $(function () {
                 return false;
             }
         });
-
+        players.push(data.username);
     });
 
-    socket.on('joined', function (data) {
+    socket.on('joined', function (data) {//this joined
         $('#homemenu').remove();
         getChat('#container');
         getGame('#container');
@@ -234,16 +263,11 @@ $(function () {
             addCard('#you .hand', card);
         });
         $('#you .hand .card').on('click', function () {// event for play card
-            $(this).css({
-                position: 'absolute',
-                left: $('#you .discard-pile .card').length*0.5*$(this).width(),
-                bottom: 0
-            });
-            $('#you .discard-pile').append($(this));
-
             $('#you .hand .card').off('click');
+            $(this).remove();
 
-            socket.emit('playCard', {id: $(this).attr('face')});
+            lastPlayed = $(this).attr('face');
+            showSelect();
         })
 
     });
@@ -255,13 +279,23 @@ $(function () {
     });
 
     socket.on('cardPlayed', function (data) {
-        let selector = '#'+data.username+' .discard-pile';
+        let selector, pos;
+
+        if(data.username === username){
+            selector = '#you .discard-pile';
+            pos = 'bottom';
+        }else {
+            selector = '#' + data.username + ' .discard-pile';
+            pos = 'top';
+        }
         addCard(selector, data.card);
-        $(selector+' .card').last().css({
+
+        let css_params = {
             position: 'absolute',
             left: ($(selector+' .card').length-1)*0.5*$(selector+' .card').width(),
-            top: 0
-        });
+        };
+        css_params[pos] = 0;
+        $(selector+' .card').last().css(css_params);
     });
 
     socket.on('gameStarted', function (data) {
@@ -274,6 +308,7 @@ $(function () {
             .unbind('mouseenter mouseleave')
             .html('<h1>?</h1>')
             .removeAttr('style');
+        $('#deck').removeClass('empty-deck').addClass('card-back');
 
         if(data){
             if(data.hasOwnProperty('hand')) {
@@ -333,6 +368,7 @@ $(function () {
             $('#' + data.username + ' .player-card').css('background', 'gray');
         }else{
             $('#you .player-card').css('background', 'gray');
+            $('#you .hand').empty();
 
         }
     });
