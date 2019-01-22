@@ -58,7 +58,6 @@ let suits = {
 };
 
 let cardEffects = function (room, data) {
-    console.log(data);
 
     switch (data.cardPlayed.id) {
         case 1://guard
@@ -82,14 +81,16 @@ let cardEffects = function (room, data) {
                         io.in(room.id).emit('cardPlayed', {username: data.targetPlayer.username, card: card});
                     });
                     io.in(room.id).emit('killed', {username: data.targetPlayer.username});
-                    io.to(data.currentPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.currentPlayer.hand[0].id, color: 'green'});
+                    io.to(data.currentPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.targetPlayer.hand[0].name, color: 'green'});
+                    io.to(data.targetPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.currentPlayer.hand[0].name, color: 'green'});
                 } else if (data.currentPlayer.hand[0].id < data.targetPlayer.hand[0].id) {
                     data.currentPlayer.isDead = true;
                     data.currentPlayer.hand.forEach(function (card) {
                         io.in(room.id).emit('cardPlayed', {username: data.currentPlayer.username, card: card});
                     });
                     io.in(room.id).emit('killed', {username: data.currentPlayer.username});
-                    io.to(data.currentPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.targetPlayer.hand[0].id, color: 'green'});
+                    io.to(data.currentPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.targetPlayer.hand[0].name, color: 'green'});
+                    io.to(data.targetPlayer.id).emit('logMessage', {msg: "Opponent had a: "+data.currentPlayer.hand[0].name, color: 'green'});
                 } else {
                     io.to(data.currentPlayer.id).emit('logMessage', {msg: "You had the same card as your opponent", color: 'green'});
                     io.to(data.targetPlayer.id).emit('logMessage', {msg: "You had the same card as your opponent", color: 'green'});
@@ -102,9 +103,9 @@ let cardEffects = function (room, data) {
             break;
         case 5://prince
             let discarded = data.targetPlayer.hand.shift();
-            io.in(room.id).emit('cardPlayed', {username: data.currentPlayer.username, card: discarded});
+            io.in(room.id).emit('cardPlayed', {username: data.targetPlayer.username, card: discarded});
             if(discarded.id === 8){
-                data.currentPlayer.isDead = true;
+                data.targetPlayer.isDead = true;
                 io.in(room.id).emit('killed', {username: data.targetPlayer.username});
             }else if(room.deck.length > 0) {
                 data.targetPlayer.hand.push(room.deck.shift());
@@ -113,16 +114,18 @@ let cardEffects = function (room, data) {
                 data.targetPlayer.hand.push(room.wildcard);
                 io.in(room.id).emit('logMessage', {msg: 'No cards left, wildcard was drawn instead', color: 'green'});
             }
+            io.to(data.targetPlayer.id).emit('updateHand', {hand: data.targetPlayer.hand});
             break;
-        case 7://king
+        case 6://king
             if(data.currentPlayer !== data.targetPlayer) {
                 let tmp = data.currentPlayer.hand.shift();
                 data.currentPlayer.hand.push(data.targetPlayer.hand.shift());
                 data.targetPlayer.hand.push(tmp);
+                io.to(data.targetPlayer.id).emit('updateHand', {hand: data.targetPlayer.hand});
+                io.to(data.currentPlayer.id).emit('updateHand', {hand: data.currentPlayer.hand});
             }
             break;
         case 8://princess
-            console.log(8);
             data.currentPlayer.isDead = true;
             data.currentPlayer.hand.forEach(function (card) {
                 io.in(room.id).emit('cardPlayed', {username: data.currentPlayer.username, card: card});
@@ -228,7 +231,7 @@ function initGame(room){
     room.deck = shuffle(buildDeck());
     room.discarded = [];
     room.disconnected = [];
-    if(room.players.length <= 2){
+    if(room.players.length === 2){
         for(i=0; i<3; i++){
             room.discarded.push(room.deck.shift());
         }
@@ -240,7 +243,8 @@ function initGame(room){
         player.isDead = false;
         player.isProtected = false;
 
-        io.to(player.id).emit('gameStarted', {hand: player.hand, discarded: room.discarded})
+        io.to(player.id).emit('gameStarted', {hand: player.hand, discarded: room.discarded});
+        io.to(player.id).emit('logMessage', {msg: "New Game Started!"});
     });
     room.turn = Math.floor(Math.random()*room.players.length);
     room.playing = true;
@@ -253,7 +257,7 @@ function checkDeaths(room) {//check if an end game condition is met
             alive.push(player);
         }
     });
-    if(alive.length < 1){ //change it back to 2 after testing
+    if(alive.length < 2){
         room.playing = false;
         if(alive.length === 1){
             alive[0].points++;
@@ -307,8 +311,8 @@ function nextTurn(room){
                 let active = room.players[room.turn];
                 active.hand.push(room.deck.shift());
                 active.isProtected = false;
+                io.to(active.id).emit('updateHand', {hand: active.hand});
                 io.to(active.id).emit('yourTurn', {
-                    hand: active.hand,
                     username: active.username
                 });
                 room.players.forEach(function (player) {
@@ -425,7 +429,7 @@ io.on('connection', function (socket) {
             socket.emit('gameStarted', {discarded: room.discarded});
             socket.emit('updateDeck', {cards_remaining: room.deck.length});
         }else {
-            if (room && room.players.length > 0) {// change it back to 1 after testing
+            if (room && room.players.length > 1) {
                 initGame(room);
                 nextTurn(room);
             } else {
@@ -444,38 +448,51 @@ io.on('connection', function (socket) {
         let card = suits[data.cardPlayed];
 
         if(player) {
-            //check for potential cheating by manipulating the DOM
-            if (card) {//check card validity
-                cardIndex = player.hand.findIndex(c => c.id === card.id);
-                if ((card.id === 1 && !cardChosen) //guard choice validity
-                    || cardIndex === -1 //card is not in player's hand
-                    || (!target && !rooms[r.room].disconnected.includes(data.target)) // target validity
-                    || (target && target !== player && target.isProtected)) {// target validity
+            let countess = player.hand.findIndex(c => c.id === 7);
+            let kingOrprince = player.hand.find(c => {
+                return c.id === 5 || c.id === 6
+            });
+            console.log(countess);
+            console.log(kingOrprince);
+            if (kingOrprince && countess !== -1) {//check for countess condition
+                io.in(r.room).emit('cardPlayed', {username: r.username, card: player.hand[countess]});
+                player.hand.splice(countess, 1);
+                socket.emit('updateHand', {hand: player.hand});
+            } else {
+                //check for potential cheating by manipulating the DOM
+                if (card) {//check card validity
+                    cardIndex = player.hand.findIndex(c => c.id === card.id);
+                    if ((card.id === 1 && !cardChosen) //guard choice validity
+                        || cardIndex === -1 //card is not in player's hand
+                        || (!target && !rooms[r.room].disconnected.includes(data.target)) // target validity
+                        || (target && target !== player && (target.isProtected || target.isDead))) {// target validity
+                        cheat = true;
+                    }
+                } else {
                     cheat = true;
                 }
-            } else {
-                cheat = true;
-            }
 
-            if (!cheat) {
-                if (!player.isDead) {//check if card exists in hand
-                    if (cardIndex !== -1) {
-                        player.discarded.push(player.hand.splice(cardIndex, 1)[0]);
-                        cardEffects(rooms[r.room], {
-                            currentPlayer: player,
-                            targetPlayer: target,
-                            cardChosen: cardChosen,
-                            cardPlayed: card
-                        });
-                        io.in(r.room).emit('cardPlayed', {username: r.username, card: card});
+                if (!cheat) {
+                    if (!player.isDead) {//check if card exists in hand
+                        if (cardIndex !== -1) {
+                            player.discarded.push(player.hand.splice(cardIndex, 1)[0]);
+                            cardEffects(rooms[r.room], {
+                                currentPlayer: player,
+                                targetPlayer: target,
+                                cardChosen: cardChosen,
+                                cardPlayed: card
+                            });
+                            io.in(r.room).emit('cardPlayed', {username: r.username, card: card});
+                        }
                     }
+                } else {
+                    player.isDead = true;
+                    player.hand.forEach(function (card) {
+                        io.in(r.room).emit('cardPlayed', {username: player.username, card: card});
+                    });
+                    player.hand = [];
+                    io.in(r.room).emit('killed', {username: player.username})
                 }
-            } else {
-                player.isDead = true;
-                player.hand.forEach(function (card) {
-                    io.in(r.room).emit('cardPlayed', {username: player.username, card: card});
-                });
-                io.in(r.room).emit('killed', {username: player.username})
             }
         }
         nextTurn(rooms[r.room])

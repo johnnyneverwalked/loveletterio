@@ -128,10 +128,12 @@ $(function () {
                 if(lastPlayed !== '1' || face){//check if there is a guard target, opponent is selected by default
                     $(this).off('click');
                     $('#selectModal').modal('hide');
+                    $('#showSelectButton').hide();
                     playCard(lastPlayed, $('#playerSelect').find(':selected').text(), face);
                 }
             });
 
+            $('#showSelectButton').show();
             $('#selectModal').modal('show');
         }else{
             playCard(lastPlayed, username);
@@ -212,6 +214,9 @@ $(function () {
             }
         });
         players.push(data.username);
+        if(data.isDead){
+            protection.push(data.username);
+        }
     });
 
     socket.on('joined', function (data) {//this joined
@@ -252,16 +257,20 @@ $(function () {
         }
     });
 
+    socket.on('updateHand', function (data) {
+        $('#you .hand').empty();
+        data.hand.forEach(function (card) {
+            addCard('#you .hand', card);
+        });
+    });
+
     socket.on('yourTurn', function (data) {
         remove(protection, data.username);
         $('#you .player-card').append($('#coin'));
 
         $('#you .player-card .shield').remove();
 
-        $('#you .hand').empty();
-        data.hand.forEach(function (card) {
-            addCard('#you .hand', card);
-        });
+
         $('#you .hand .card').on('click', function () {// event for play card
             $('#you .hand .card').off('click');
             $(this).remove();
@@ -273,6 +282,7 @@ $(function () {
     });
 
     socket.on('nextTurn', function (data) {
+        remove(protection, data.active_player);
         $('#'+data.active_player+' .player-card').append($('#coin'));
         $('#'+data.active_player+' .player-card .shield').remove();
         $('#you .hand .card').off('click');
@@ -318,7 +328,7 @@ $(function () {
                 addCard('#deck-discards', card);
             })
         }
-
+        $('.player-container[id] .player-card').css('background', 'mediumpurple')
     });
 
     socket.on('gameEnded', function (data) {
@@ -331,7 +341,6 @@ $(function () {
         }).removeClass('card-back').empty()
             .css('background-image', "url("+data.wildcard.image+")");
 
-        $('.player-container[id] .player-card').css('background', 'mediumpurple')
     });
 
     socket.on('win', function (data) {
