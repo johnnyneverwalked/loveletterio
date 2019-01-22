@@ -42,7 +42,7 @@ h1{
 }
 
 #rules{
-    background-image: url("../images/copyright/rules.jpg");
+    background-image: url("../images/rules.jpg");
     margin-right: 10px;
 }
 
@@ -140,7 +140,7 @@ h1{
 }
 
 .card-back{
-    background-image: url("../images/copyright/card-back.jpg");
+    background-image: url("../images/card-back.jpg");
 }
 
 .card-mini{

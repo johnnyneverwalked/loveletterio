@@ -71,13 +71,13 @@ $(function () {
         });
 
         $('#rules').hover(function () {
-            $('#card-prev').css('background-image', "url(../images/copyright/rules.jpg)").show()
+            $('#card-prev').css('background-image', "url(../images/rules.jpg)").show()
         }, function () {
             $('#card-prev').hide();
         });
         
         $('#cards .card').each(function () { //modal cards events
-            $(this).css('background-image', 'url("images/copyright/'+$(this).attr('face')+'.jpg")');
+            $(this).css('background-image', 'url("images/'+$(this).attr('face')+'.jpg")');
             $(this).on('click', function () {
                 $('#cards .selected-card').removeClass('selected-card');
                 $(this).addClass('selected-card');

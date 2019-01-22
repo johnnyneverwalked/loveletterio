@@ -12,7 +12,7 @@ app.get('/', function (req, res) {
 });
 
 let rooms = {};
-let imgdest = '../images/copyright/';
+let imgdest = '../images/';
 
 let suits = {
     1: {
