@@ -452,8 +452,6 @@ io.on('connection', function (socket) {
             let kingOrprince = player.hand.find(c => {
                 return c.id === 5 || c.id === 6
             });
-            console.log(countess);
-            console.log(kingOrprince);
             if (kingOrprince && countess !== -1) {//check for countess condition
                 io.in(r.room).emit('cardPlayed', {username: r.username, card: player.hand[countess]});
                 player.hand.splice(countess, 1);
