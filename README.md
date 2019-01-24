@@ -3,7 +3,7 @@
 Browser-based implementation of the popular Loveletter card game.
 Created with jquery, node, socket.io and express.
 
-Simply download and use npm install, npm run to start the server. The server runs at port 1234.
+Simply download and use npm install, npm start to start the server. The server runs at port 1234.
 In the browser just enter a name, create a room or join a friend's room and start playing right away! No account needed
 
 I did not use the original card images for obvious copyright reasons.
