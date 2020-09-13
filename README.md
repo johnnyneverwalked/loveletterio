@@ -3,7 +3,7 @@
 Browser-based implementation of the popular Loveletter card game.
 Created with jquery, node, socket.io and express.
 
-Simply download the project and use ```npm install package.json```.To start the server use ```npm start``` or with nodemon ```npm run start-dev```. The server runs at port 1234.
+Simply download the project and use ```npm install```.To start the server use ```npm run start``` or with nodemon ```npm run start-dev```. The server runs at port 1234.
 In the browser just enter a name, create a room or join a friend's room and start playing right away. No account needed.
 
 I did not use the original card art for obvious copyright reasons.
